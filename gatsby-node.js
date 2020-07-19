@@ -44,15 +44,15 @@ exports.onPostBuild = async function (api, options) {
     }
   );
 
-  const body = await res.json();
+  const responseBody = await res.json();
 
-  if (!res.ok || !body.success) {
+  if (!res.ok || !responseBody.success) {
     reporter.warn(
       "response from CloudFlare indicates cache clear failure: " +
         JSON.stringify(
           {
             status: res.status,
-            errors: body.errors,
+            errors: responseBody.errors,
           },
           undefined,
           2
