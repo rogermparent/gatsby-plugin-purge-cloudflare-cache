@@ -1,12 +1,6 @@
 const fetch = require("node-fetch");
 const { name } = require("./package.json");
 
-const reporters = (reporter) => ({
-  optionsOrPanic: (options) => {},
-});
-
-const pkgPrefix = (message) => `${name}: ${message}`;
-
 exports.onPostBuild = async function (api, options) {
   const { reporter } = api;
   const {
@@ -16,9 +10,11 @@ exports.onPostBuild = async function (api, options) {
     headers = {},
     body = { purge_everything: true },
   } = options;
-  const { requiredOptionPanic } = reporters(reporter);
 
-  if (typeof condition === "function" && !condition(api, options)) {
+  if (
+    condition === false ||
+    (typeof condition === "function" && !condition(api, options))
+  ) {
     reporter.info("Skipping due to failed condition");
   }
 

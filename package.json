@@ -4,5 +4,10 @@
   "description": "A plugin to programmatically clear CloudFlare cache after Gatsby builds",
   "main": "index.js",
   "author": "RMP",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "cloudflare"
+  ]
 }
