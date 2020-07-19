@@ -1,6 +1,36 @@
 const fetch = require("node-fetch");
 const { name } = require("./package.json");
 
+const pkgPrefix = (msg) => `${name}: ${msg}`;
+const error = (msg) => new Error(pkgPrefix(msg));
+let conditionFulfilled = false;
+
+const checkCondition = (condition, api, options) =>
+  Boolean(
+    typeof condition === "function" ? condition(api, options) : condition
+  );
+
+exports.onPreInit = async function (api, options) {
+  const { reporter } = api;
+  const { condition, token, zoneId } = options;
+
+  conditionFulfilled = checkCondition(condition, api, options);
+
+  if (!conditionFulfilled)
+    reporter.info(pkgPrefix("Will skip due to failed condition"));
+
+  const missingOptions = Object.entries({
+    token,
+    zoneId,
+  }).reduce((acc, [k, v]) => (v ? acc : [...acc, k]), []);
+
+  if (missingOptions.length > 0) {
+    reporter.panic(
+      error(`Some required options are missing! (${missingOptions.join(", ")})`)
+    );
+  }
+};
+
 exports.onPostBuild = async function (api, options) {
   const { reporter } = api;
   const {
@@ -11,25 +41,9 @@ exports.onPostBuild = async function (api, options) {
     body = { purge_everything: true },
   } = options;
 
-  if (
-    condition === false ||
-    (typeof condition === "function" && !condition(api, options))
-  ) {
-    reporter.info("Skipping due to failed condition");
+  if (!conditionFulfilled) {
+    return;
   }
-
-  const missingOptions = Object.entries({
-    token,
-    zoneId,
-  }).reduce((acc, [k, v]) => (v ? [...acc, k] : acc), []);
-
-  if (missingOptions.length > 0) {
-    reporter.panic(
-      "Some required options are missing: " + missingOptions.join(", ")
-    );
-  }
-
-  // Now that everything's initialized, we can send the request.
 
   const res = await fetch(
     `https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`,
@@ -48,17 +62,19 @@ exports.onPostBuild = async function (api, options) {
 
   if (!res.ok || !responseBody.success) {
     reporter.warn(
-      "response from CloudFlare indicates cache clear failure: " +
-        JSON.stringify(
-          {
-            status: res.status,
-            errors: responseBody.errors,
-          },
-          undefined,
-          2
-        )
+      pkgPrefix(
+        "response from CloudFlare indicates cache clear failure: " +
+          JSON.stringify(
+            {
+              status: res.status,
+              errors: responseBody.errors,
+            },
+            undefined,
+            2
+          )
+      )
     );
+  } else {
+    reporter.info(pkgPrefix("Cleared CloudFlare cache successfully"));
   }
-
-  reporter.info("Cleared CloudFlare cache successfully");
 };
