@@ -8,6 +8,8 @@ This plugin sends a request to the CloudFlare API, optionally only doing so when
 
 A CloudFlare API token for your site with permissions to purge cache.
 
+A word of warning: don't just stick your token in here as a string if others can see your code! Grab your token from `process.env` and use `dotenv` to make that easier while developing.
+
 ### zoneId: string!
 
 The CloudFlare Zone ID for your site (find it on the Web UI dashboard)
