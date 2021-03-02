@@ -1,6 +1,6 @@
 {
   "name": "gatsby-plugin-purge-cloudflare-cache",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A plugin to programmatically clear CloudFlare cache after Gatsby builds",
   "main": "index.js",
   "author": "RMP",
