@@ -16,8 +16,10 @@ exports.onPreInit = async function (api, options) {
 
   conditionFulfilled = checkCondition(condition, api, options);
 
-  if (!conditionFulfilled)
+  if (!conditionFulfilled) {
     reporter.info(pkgPrefix("Will skip due to failed condition"));
+    return;
+  }
 
   const missingOptions = Object.entries({
     token,
